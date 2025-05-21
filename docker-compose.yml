@@ -1,0 +1,18 @@
+services:
+  atividade_service:
+    build:
+      context: ./atividade_service
+    ports:
+      - '5002:5002'
+    volumes:
+      - ./atividade_service:/app
+      - ./atividade_service/db_data:/app/app_data # Pasta local -> pasta no container
+
+  pessoa_service:
+    build:
+      context: ./pessoa_service
+    ports:
+      - '5001:5001'
+    volumes:
+      - ./pessoa_service:/app
+      - ./pessoa_service/db_data:/app/app_data
