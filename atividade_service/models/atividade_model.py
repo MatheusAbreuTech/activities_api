@@ -1,32 +1,25 @@
-atividades = [
-    {
-        'id_atividade': 1,
-        'id_disciplina': 1,
-        'enunciado': 'Crie um app de todo em Flask',
-        'respostas': [
-            {'id_aluno': 1, 'resposta': 'todo.py', 'nota': 9},
-            {'id_aluno': 2, 'resposta': 'todo.zip.rar'},
-            {'id_aluno': 4, 'resposta': 'todo.zip', 'nota': 10}
-        ]
-    },
-    {
-        'id_atividade': 2,
-        'id_disciplina': 1,
-        'enunciado': 'Crie um servidor que envia email em Flask',
-        'respostas': [
-            {'id_aluno': 4, 'resposta': 'email.zip', 'nota': 10}
-        ]
-    }
-]
+from config import db
+from dataclasses import dataclass
+from .resposta_model import Resposta
 
-class AtividadeNotFound(Exception):
-    pass
+@dataclass
+class Atividade(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    enunciado = db.Column(db.String, nullable=False)
+    id_disciplina = db.Column(db.Integer, db.ForeignKey('disciplina.id'), nullable=False)
 
-def listar_atividades():
-    return atividades
+    respostas = db.relationship('Resposta', back_populates='atividade', cascade='all, delete-orphan')
 
-def obter_atividade(id_atividade):
-    for atividade in atividades:
-        if atividade['id_atividade'] == id_atividade:
-            return atividade
-    raise AtividadeNotFound
+    def __init__(self, id_disciplina, enunciado):
+        self.id_disciplina = id_disciplina
+        self.enunciado = enunciado
+
+    def __repr__(self):
+        return f"Atividade(id={self.id}, id_disciplina={self.id_disciplina}, enunciado={self.enunciado})"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'id_disciplina': self.id_disciplina,
+            'enunciado': self.enunciado,
+        }
