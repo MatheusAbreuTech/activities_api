@@ -11,8 +11,7 @@ class Resposta(db.Model):
     id_atividade = db.Column(db.Integer, db.ForeignKey('atividade.id'), nullable=False)
     atividade = db.relationship('Atividade', back_populates='respostas')
 
-    def __init__(self, id, id_aluno, id_atividade, resposta, nota=None):
-        self.id = id
+    def __init__(self, id_aluno, id_atividade, resposta, nota=None):
         self.id_aluno = id_aluno
         self.id_atividade = id_atividade
         self.resposta = resposta

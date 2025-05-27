@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from service.atividade_service import AtividadeNotFound, DisciplinaNaoEncontrada, cadastrar_atividade, listar_atividades, obter_atividade,cadastrar_disciplina, obter_disciplina
+from service.atividade_service import AtividadeNotFound, DisciplinaNaoEncontrada, cadastrar_resposta, cadastrar_atividade, listar_atividades, obter_atividade,cadastrar_disciplina, obter_disciplina
 from clients.pessoa_service_client import PessoaServiceClient
 
 atividade_bp = Blueprint('atividade_bp', __name__)
@@ -55,3 +55,17 @@ def cadastrar_disciplina_route():
     
     disciplina, code = cadastrar_disciplina(nome=nome, publica=publica)
     return jsonify(disciplina), code
+
+@atividade_bp.route('/resposta/<int:id_atividade>', methods=['POST'])
+def cadastrar_resposta_route(id_atividade):
+    try:
+        data = request.get_json()
+        resposta = data.get('resposta', None)
+        id_aluno = data.get('id_aluno', None)
+        nota = data.get('nota', None)
+        
+        resposta, code = cadastrar_resposta(id_atividade=id_atividade, id_aluno=id_aluno, resposta=resposta)
+        return jsonify(resposta), code
+    except AtividadeNotFound:
+        return jsonify({'erro': 'Atividade não encontrada'}), 404
+    
