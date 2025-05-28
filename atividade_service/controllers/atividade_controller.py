@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
-from service.atividade_service import AtividadeNotFound, DisciplinaNaoEncontrada, cadastrar_resposta, cadastrar_atividade, listar_atividades, obter_atividade,cadastrar_disciplina, obter_disciplina
+from service.atividade_service import AtividadeNotFound, cadastrar_atividade, listar_atividades, obter_atividade, delete_atividade, update_atividade
+from service.disciplina_service import DisciplinaNaoEncontrada
 from clients.pessoa_service_client import PessoaServiceClient
 
 atividade_bp = Blueprint('atividade_bp', __name__)
@@ -28,44 +29,22 @@ def cadastrar_atividade_route():
     except DisciplinaNaoEncontrada as error:
         return jsonify({'erro': 'Disciplina não encontrada'}), 404
 
-@atividade_bp.route('/<int:id_atividade>/professor/<int:id_professor>', methods=['GET'])
-def obter_atividade_para_professor_route(id_atividade, id_professor):
+@atividade_bp.route('/<int:id_atividade>', methods=['DELETE'])
+def delete_atividade_route(id_atividade):
     try:
-        atividade = obter_atividade(id_atividade)
-        if not PessoaServiceClient.verificar_leciona(id_professor, atividade['id_disciplina']):
-            atividade = atividade.copy()
-            atividade.pop('respostas', None)
-        return jsonify(atividade)
-    except AtividadeNotFound(error):
-        return jsonify(error), 404
-    
-@atividade_bp.route('/disciplina/<int:id_disciplina>', methods=['GET'])
-def obter_disciplina_route(id_disciplina):
-    try:
-        disciplina, code = obter_disciplina(id_disciplina)
-        return jsonify(disciplina), code
-    except DisciplinaNaoEncontrada:
-        return jsonify({'erro': 'Disciplina não encontrada'}), 404
+        atividade, code = delete_atividade(id_atividade=id_atividade)
+        return jsonify(atividade), code
+    except AtividadeNotFound:
+        return jsonify({'erro': 'Atividade nao encontrada'}), 404
 
-@atividade_bp.route('/disciplina', methods=['POST'])
-def cadastrar_disciplina_route():
-    data = request.get_json()
-    nome = data.get('nome', None)
-    publica = data.get('publica', False)
-    
-    disciplina, code = cadastrar_disciplina(nome=nome, publica=publica)
-    return jsonify(disciplina), code
-
-@atividade_bp.route('/resposta/<int:id_atividade>', methods=['POST'])
-def cadastrar_resposta_route(id_atividade):
+@atividade_bp.route('/<int:id_atividade>', methods=['PUT'])
+def update_atividade_route(id_atividade):
     try:
         data = request.get_json()
-        resposta = data.get('resposta', None)
-        id_aluno = data.get('id_aluno', None)
-        nota = data.get('nota', None)
-        
-        resposta, code = cadastrar_resposta(id_atividade=id_atividade, id_aluno=id_aluno, resposta=resposta)
-        return jsonify(resposta), code
+        id=data.get('id', None)
+        enunciado=data.get('enunciado', None)
+        atividade, code = update_atividade(id_atividade=id_atividade, enunciado=enunciado)
+        return jsonify(atividade), code
     except AtividadeNotFound:
-        return jsonify({'erro': 'Atividade não encontrada'}), 404
-    
+        return jsonify({'erro': 'Atividade nao encontrada'}), 404    
+                
